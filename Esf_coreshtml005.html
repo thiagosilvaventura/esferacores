@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esfera de Cores</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <div>
+        <canvas id="sphereCanvas" width="400" height="400" style="border: 1px solid #000;"></canvas>
+    </div>
+    <div>
+        <label for="numSpectrums">Número de Faixas:</label>
+        <input type="number" id="numSpectrums" value="7" min="1" max="20">
+    </div>
+    <div>
+        <label for="radius">Raio da Esfera (1-500):</label>
+        <input type="number" id="radius" value="100" min="1" max="500">
+    </div>
+    <div>
+        <label for="numRepetitions">Número de Repetições do Espectro:</label>
+        <input type="number" id="numRepetitions" value="1" min="1" max="20">
+    </div>
+    <div id="equationDiv">
+        <p id="equation"></p>
+    </div>
+    <script>
+        const canvas = document.getElementById("sphereCanvas");
+        const ctx = canvas.getContext("2d");
+        const numSpectrumsInput = document.getElementById("numSpectrums");
+        const radiusInput = document.getElementById("radius");
+        const numRepetitionsInput = document.getElementById("numRepetitions");
+        const equationDiv = document.getElementById("equation");
+
+        const rainbowColors = ["red", "orange", "yellow", "green", "lightblue", "blue", "indigo", "violet"];
+        let currentColorIndex = 0;
+
+        function calculateSphereCoordinates(radius, numPoints) {
+            const coordinates = [];
+
+            for (let phi = 0; phi <= Math.PI; phi += Math.PI / numPoints) {
+                for (let theta = 0; theta <= 2 * Math.PI; theta += 2 * Math.PI / numPoints) {
+                    const x = radius * Math.sin(phi) * Math.cos(theta);
+                    const y = radius * Math.sin(phi) * Math.sin(theta);
+                    const z = radius * Math.cos(phi);
+
+                    coordinates.push({ x, y, z });
+                }
+            }
+
+            return coordinates;
+        }
+
+        function drawSphere(coordinates) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const numSpectrums = parseInt(numSpectrumsInput.value, 10);
+            const numRepetitions = parseInt(numRepetitionsInput.value, 10);
+
+            ctx.beginPath();
+
+            coordinates.forEach((coord, index) => {
+                const x = centerX + coord.x * 50;
+                const y = centerY + coord.y * 50;
+
+                if (index % (numRepetitions * numSpectrums) === 0) {
+                    currentColorIndex = 0; // Reinicia a sequência de cores para cada conjunto de repetições
+                }
+
+                const currentColor = rainbowColors[currentColorIndex % rainbowColors.length];
+                ctx.fillStyle = currentColor;
+                ctx.arc(x, y, 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+
+                if (index % numRepetitions === 0) {
+                    currentColorIndex++; // Avança para a próxima cor na sequência
+                }
+            });
+
+            ctx.closePath();
+        }
+
+        function updateSphere() {
+            const radius = parseInt(radiusInput.value, 10);
+            const numSpectrums = parseInt(numSpectrumsInput.value, 10);
+            const numRepetitions = parseInt(numRepetitionsInput.value, 10);
+            const coordinates = calculateSphereCoordinates(radius, numSpectrums * numRepetitions * 10);
+            drawSphere(coordinates);
+
+            // Exibir a equação
+            const areaEquation = `Área da Faixa = Área da Esfera / (Número de Faixas * Número de Repetições)
+                                = ${(4 * Math.PI * radius ** 2) / (numSpectrums * numRepetitions)}`;
+
+            equationDiv.innerHTML = `
+                <p><b>Legendas:</b></p>
+                <p>Área da Esfera: \(4 \pi r^2\)</p>
+                <p>Número de Faixas: ${numSpectrums}</p>
+                <p>Número de Repetições: ${numRepetitions}</p>
+                <p>Área da Faixa: \( \frac{4 \pi r^2}{\text{Número de Faixas} \times \text{Número de Repetições}} \)</p>
+                <p><b>Equação:</b></p>
+                <p>${

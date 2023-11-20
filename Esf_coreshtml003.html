@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esfera de Cores 3D</title>
+    <script src="https://threejs.org/build/three.js"></script>
+</head>
+<body>
+    <script>
+        // Configuração básica
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Cores do arco-íris
+        const colors = [0xFF0000, 0xFFA500, 0xFFFF00, 0x00FF00, 0x00BFFF, 0x0000FF, 0x4B0082];
+
+        // Criar esfera
+        const geometry = new THREE.SphereGeometry(5, 32, 32);
+        const materials = colors.map(color => new THREE.MeshBasicMaterial({ color }));
+        const sphere = new THREE.Mesh(geometry, materials);
+        scene.add(sphere);
+
+        // Posicionar a câmera
+        camera.position.z = 10;
+
+        // Adicionar luz
+        const light = new THREE.PointLight(0xFFFFFF);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+
+        // Animar a esfera
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rodar a esfera
+            sphere.rotation.x += 0.005;
+            sphere.rotation.y += 0.005;
+
+            renderer.render(scene, camera);
+        }
+
+        // Redimensionar a tela
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

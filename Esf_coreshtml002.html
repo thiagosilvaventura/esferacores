@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esfera de Cores</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <div>
+        <canvas id="sphereCanvas" width="400" height="400" style="border: 1px solid #000;"></canvas>
+    </div>
+    <script>
+        const canvas = document.getElementById("sphereCanvas");
+        const ctx = canvas.getContext("2d");
+        const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+        let numSpectrums = 1;
+
+        function calculateSphereCoordinates(radius, numPoints) {
+            const coordinates = [];
+
+            for (let phi = 0; phi <= Math.PI; phi += Math.PI / numPoints) {
+                for (let theta = 0; theta <= 2 * Math.PI; theta += 2 * Math.PI / numPoints) {
+                    const x = radius * Math.sin(phi) * Math.cos(theta);
+                    const y = radius * Math.sin(phi) * Math.sin(theta);
+                    const z = radius * Math.cos(phi);
+
+                    coordinates.push({ x, y, z });
+                }
+            }
+
+            return coordinates;
+        }
+
+        function drawSphere(coordinates) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            ctx.beginPath();
+
+            coordinates.forEach((coord, index) => {
+                const x = centerX + coord.x * 50;
+                const y = centerY + coord.y * 50;
+
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.closePath();
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, canvas.width / 2);
+            gradient.addColorStop(0, colors[0]);
+            for (let i = 1; i < colors.length; i++) {
+                gradient.addColorStop(i / colors.length, colors[i]);
+            }
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.stroke();
+        }
+
+        function updateSphere() {
+            const radius = 1;
+            const coordinates = calculateSphereCoordinates(radius, numSpectrums * 10);
+            drawSphere(coordinates);
+        }
+
+        function animate() {
+            setInterval(() => {
+                numSpectrums++;
+                updateSphere();
+            }, 2000);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
